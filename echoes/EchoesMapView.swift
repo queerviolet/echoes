@@ -11,14 +11,13 @@ import MapKit
 
 class EchoesMapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate {
     var map: MKMapView!
-    var locationMgr: CLLocationManager!
+    let locationMgr = CLLocationManager()
     
     var recordButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        locationMgr = CLLocationManager()
         locationMgr.delegate = self
         
         map = MKMapView(frame: view.bounds)
@@ -26,7 +25,7 @@ class EchoesMapViewController: UIViewController, MKMapViewDelegate, CLLocationMa
         
         view.addSubview(map)
         
-        recordButton = UIButton.buttonWithType(.System) as UIButton
+        recordButton = UIButton(type: .System)
         recordButton.setTitle("rec", forState: .Normal)
         recordButton.frame = CGRectMake(
             view.bounds.width / 2.0 - 25,
@@ -44,46 +43,20 @@ class EchoesMapViewController: UIViewController, MKMapViewDelegate, CLLocationMa
     }
     
     func record(sender: UIButton!) {
-        switch(CLLocationManager.authorizationStatus()) {
-        case .NotDetermined:
-            println("requesting authorization...")
-            locationMgr.requestWhenInUseAuthorization()
-            
-        case .Restricted, .Denied:
-            println("access to location services denied")
-        
-        case .AuthorizedWhenInUse, .Authorized:
-            println("location services already authorized")
-            
-        default:
-            println("unknown enum value for CLAuthorizationStatus: what does this mean?")
-        }
+        let app = UIApplication.sharedApplication().delegate as! AppDelegate
+        app.echoRecorder.toggle()
     }
     
-    func mapView(mapView: MKMapView!, didUpdateUserLocation userLocation: MKUserLocation!) {
-        println("User location updated:\(userLocation.location)")
+    func mapView(mapView: MKMapView, didUpdateUserLocation userLocation: MKUserLocation) {
+        //print("Map View User location updated:\(userLocation.location)")
     }
     
-    func locationManager(manager: CLLocationManager!, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
-        /*
-        enum CLAuthorizationStatus : Int32 {
-            case NotDetermined = 0
-            case Restricted = 1
-            case Denied = 2
-            case AuthorizedAlways = 3
-            case AuthorizedWhenInUse = 4
-        }
-        */
-
-        println("didChangeAuthorizationStatus status:\(status.toRaw())")
-        if (status == .Authorized || status == .AuthorizedWhenInUse) {
+    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+        NSLog("didChangeAuthorizationStatus status:%d", status.rawValue)
+        if (status == .AuthorizedAlways || status == .AuthorizedWhenInUse) {
             map.showsUserLocation = true
-            locationMgr.startUpdatingLocation()
-            locationMgr.startUpdatingHeading()
         } else {
             map.showsUserLocation = false
-            locationMgr.stopUpdatingLocation()
-            locationMgr.stopUpdatingHeading()
         }
     }
 }

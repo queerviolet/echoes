@@ -2,18 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationUsageDescription</key>
-	<string>Echoes needs your location to place your tracks on the map</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>Echoes needs your location to place your tracks on the map</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Echoes needs your location to place your tracks on the map</string>
-    <key>CFBundleDevelopmentRegion</key>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Echoes needs to use the microphone to record the dreams of the world</string>
+	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>works.ashi.$(PRODUCT_NAME:rfc1034identifier)</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -28,6 +24,16 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Echoes needs your location to place your tracks on the map</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Echoes needs your location to place your tracks on the map</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Echoes needs your location to place your tracks on the map</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
