@@ -9,23 +9,27 @@
 import Foundation
 
 class FileBucket {
-    let id: String!
+    let bucketId: String!
+    let sessionId: String!
     let dir: NSURL!
     var nextFileId = 0
     
-    init(id: String) throws {
-        self.id = id
+    init(bucketId id: String) throws {
+        self.bucketId = id
         let fsMgr = NSFileManager.defaultManager()
         let root = try! fsMgr.URLForDirectory(
             NSSearchPathDirectory.DocumentDirectory,
             inDomain: NSSearchPathDomainMask.UserDomainMask,
             appropriateForURL: nil,
             create: true).URLByAppendingPathComponent(id)
-        var url = root.URLByAppendingPathComponent(NSUUID().UUIDString)
+        var sesh = NSUUID().UUIDString
+        var url = root.URLByAppendingPathComponent(sesh)
         while fsMgr.fileExistsAtPath(url.path!) {
-            url = root.URLByAppendingPathComponent(NSUUID().UUIDString)
+            sesh = NSUUID().UUIDString
+            url = root.URLByAppendingPathComponent(sesh)
         }
         dir = url
+        sessionId = sesh
         try fsMgr.createDirectoryAtURL(url, withIntermediateDirectories: true, attributes: nil)
     }
     

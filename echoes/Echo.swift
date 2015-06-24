@@ -33,7 +33,7 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     let segmentLength = NSTimeInterval(60.0)  // audio file length in seconds, must be at least 1.
     let segmentOverlap = NSTimeInterval(1.0e-3) // one millisecond of overlap between segments.
 
-    let bucket = try! FileBucket(id: "echoes-audio-segments")
+    let bucket = try! FileBucket(bucketId: "echoes-segments")
 
     let locationMgr = CLLocationManager()
 

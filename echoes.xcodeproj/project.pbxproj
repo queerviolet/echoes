@@ -14,6 +14,7 @@
 		5A826A2D1B38A98500A39D83 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5A826A2C1B38A98500A39D83 /* MapKit.framework */; };
 		5AC1E0911B3A64980043589D /* FileBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC1E0901B3A64980043589D /* FileBucket.swift */; };
 		5AC1E0931B3B56950043589D /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 5AC1E0921B3B56950043589D /* libsqlite3.tbd */; };
+		5AC1E0951B3B57770043589D /* LocationDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC1E0941B3B57770043589D /* LocationDB.swift */; };
 		5AE156081B38E29F00A0A64C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5AE156071B38E29F00A0A64C /* Default-568h@2x.png */; };
 		5AE1560A1B390D6000A0A64C /* Echo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE156091B390D6000A0A64C /* Echo.swift */; };
 /* End PBXBuildFile section */
@@ -40,6 +41,7 @@
 		5A826A2C1B38A98500A39D83 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		5AC1E0901B3A64980043589D /* FileBucket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBucket.swift; sourceTree = "<group>"; };
 		5AC1E0921B3B56950043589D /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = text; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
+		5AC1E0941B3B57770043589D /* LocationDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocationDB.swift; sourceTree = "<group>"; };
 		5AE156071B38E29F00A0A64C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		5AE156091B390D6000A0A64C /* Echo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Echo.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +91,7 @@
 			children = (
 				5A826A0C1B38A5A700A39D83 /* AppDelegate.swift */,
 				5AC1E0901B3A64980043589D /* FileBucket.swift */,
+				5AC1E0941B3B57770043589D /* LocationDB.swift */,
 				5AE156091B390D6000A0A64C /* Echo.swift */,
 				5A826A0E1B38A5A700A39D83 /* EchoesMapView.swift */,
 				5A826A131B38A5A700A39D83 /* Images.xcassets */,
@@ -232,6 +235,7 @@
 				5AC1E0911B3A64980043589D /* FileBucket.swift in Sources */,
 				5A826A0F1B38A5A700A39D83 /* EchoesMapView.swift in Sources */,
 				5A826A0D1B38A5A700A39D83 /* AppDelegate.swift in Sources */,
+				5AC1E0951B3B57770043589D /* LocationDB.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

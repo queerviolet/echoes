@@ -1,0 +1,3 @@
+[submodule "ext/protobuf-swift"]
+	path = ext/protobuf-swift
+	url = git@github.com:alexeyxo/protobuf-swift.git

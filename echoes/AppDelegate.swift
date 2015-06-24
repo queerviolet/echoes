@@ -16,8 +16,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let echoRecorder = EchoRecorder()
     var mapViewCtrl: EchoesMapViewController!
     
+    func alert(msg: String) {
+        UIAlertView(title: "Echoes Alert",
+            message: msg,
+            delegate: nil,
+            cancelButtonTitle: nil).show()
+    }
+    
+    func alert(title title: String, msg: String) {
+        UIAlertView(title: title,
+            message: msg,
+            delegate: nil,
+            cancelButtonTitle: nil).show()
+    }
+    
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-        NSLog("Vendor identifier: %@", UIDevice.currentDevice().identifierForVendor!)
+        if let vendorId = UIDevice.currentDevice().identifierForVendor?.UUIDString {
+            NSLog("Vendor identifier: %@", vendorId)
+        } else {
+            alert(title: "Vendor ID Unavailable",
+                  msg: "Couldn't read identifier for vendor. This should only happen if your phone is locked.")
+            NSLog("Vendor identifier unreadable.")
+        }
         
         let frame = UIScreen.mainScreen().bounds
         let window = UIWindow(frame: frame)
