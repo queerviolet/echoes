@@ -13,28 +13,21 @@ import CoreLocation
 import AVFoundation
 import UIKit
 
-struct Echo {
-    
-}
-
 enum EchoRecorderState {
     case Stopped
     case Recording
 }
 
-class EchoRecorder: NSObject, CLLocationManagerDelegate {
-    let locationMgr = CLLocationManager()
+class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate {
     var state = EchoRecorderState.Stopped
-    
-    let recorders = Set<AVAudioRecorder>()
-    var recorder: AVAudioRecorder?
 
-    let fsMgr = NSFileManager.defaultManager()
-    let baseUrl = try! NSFileManager.defaultManager().URLForDirectory(
-        NSSearchPathDirectory.DocumentDirectory,
-        inDomain: NSSearchPathDomainMask.UserDomainMask,
-        appropriateForURL: nil,
-        create: true)
+    let locationMgr = CLLocationManager()
+    
+    let audioSession = AVAudioSession.sharedInstance()
+    var recorder: AVAudioRecorder?
+    var nextRecorder: AVAudioRecorder?
+
+    let bucket = try! FileBucket(id: "echoes")
     
     override init() {
         super.init()
@@ -70,18 +63,14 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate {
         if (state == .Recording) { return; }
 
         requestAuthorizations()
-        let url = createDocumentUrl("m4a")
-        NSLog("Write to URL: %@", url)
+        
+        do { try startRecordingSession() } catch let error as NSError {
+            NSLog("Couldn't initialize recording session: %@", error)
+        }
         
         do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(AVAudioSessionCategoryRecord)
-            try session.setActive(true)
-            recorder = try AVAudioRecorder(
-                URL: url,
-                settings: recordingSettings)
+            try initRecorders()
             state = .Recording
-            recorder!.record()
             NSLog("Recording.")
         } catch let error as NSError {
             state = .Stopped
@@ -89,11 +78,64 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate {
         }
     }
     
+    // One minute segments.
+    let segmentLength = NSTimeInterval(5.0)
+    
+    func initRecorders() throws {
+        let rec = try createRecorder()
+        recorder = rec
+        try prepareNextRecorder()
+        rec.recordAtTime(rec.deviceCurrentTime, forDuration: segmentLength)
+    }
+    
+    func prepareNextRecorder() throws {
+        let rec = try createRecorder()
+        rec.recordAtTime(rec.deviceCurrentTime + segmentLength, forDuration: segmentLength)
+        self.nextRecorder = rec
+    }
+    
+    func createRecorder() throws -> AVAudioRecorder {
+        let url = bucket.getUrl("m4a")
+        NSLog("Will write audio segment to: %@", url)
+        let rec = try AVAudioRecorder(URL: url, settings: recordingSettings)
+        rec.delegate = self
+        return rec
+    }
+    
+    func audioRecorderDidFinishRecording(recorder: AVAudioRecorder, successfully flag: Bool) {
+        NSLog("Recorder finished, wrote %@", recorder.url)
+        if (recorder == self.recorder && state == .Recording) {
+            self.recorder = self.nextRecorder
+            do { try prepareNextRecorder() } catch let error as NSError {
+                NSLog("Error creating recorder for segment: %@", error)
+                stop()
+            }
+        }
+    }
+    
     func stop() {
         if (state == .Stopped) { return; }
         if let recorder = recorder {
             recorder.stop()
+            self.recorder = nil
         }
+        if let nextRecorder = nextRecorder {
+            nextRecorder.stop()
+            self.nextRecorder = nil
+        }
+        do { try stopRecordingSession() } catch let error as NSError {
+            NSLog("Error closing AVAudioSession: %@", error)
+        }
+        NSLog("Recording stopped.")
+    }
+
+    func startRecordingSession() throws {
+        try audioSession.setCategory(AVAudioSessionCategoryRecord)
+        try audioSession.setActive(true)
+    }
+    
+    func stopRecordingSession() throws {
+        try audioSession.setActive(false)
     }
     
     func toggle() {
@@ -103,17 +145,6 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate {
         case .Stopped:
             start()
         }
-    }
-    
-    func createDocumentUrl(ext: String?) -> NSURL {
-        var url = baseUrl.URLByAppendingPathComponent(NSUUID().UUIDString)
-        while fsMgr.fileExistsAtPath(url.path!) {
-            url = baseUrl.URLByAppendingPathComponent(NSUUID().UUIDString)
-        }
-        if let ext = ext {
-            return url.URLByAppendingPathExtension(ext)
-        }
-        return url
     }
     
     func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
