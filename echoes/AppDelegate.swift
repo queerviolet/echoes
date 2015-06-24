@@ -17,6 +17,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var mapViewCtrl: EchoesMapViewController!
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        NSLog("Vendor identifier: %@", UIDevice.currentDevice().identifierForVendor!)
+        
         let frame = UIScreen.mainScreen().bounds
         let window = UIWindow(frame: frame)
         self.window = window

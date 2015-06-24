@@ -42,6 +42,8 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
         locationMgr.delegate = self
     }
     
+    func toggle() { state == .Stopped ? start() : stop(); }
+    
     func start() {
         if (state == .Recording) { return; }
 
@@ -63,25 +65,12 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     
     func stop() {
         if (state == .Stopped) { return; }
-        if let recorder = recorder {
-            recorder.stop()
-            self.recorder = nil
-        }
-        if let nextRecorder = nextRecorder {
-            nextRecorder.stop()
-            self.nextRecorder = nil
-        }
+        recorder?.stop(); recorder = nil
+        nextRecorder?.stop(); nextRecorder = nil
         do { try stopRecordingSession() } catch let error as NSError {
             NSLog("Error closing AVAudioSession: %@", error)
         }
         NSLog("Recording stopped.")
-    }
-    
-    func toggle() {
-        switch (state) {
-        case .Recording: stop()
-        case .Stopped: start()
-        }
     }
     
     // Request the appropriate authorizations to track location data
@@ -178,10 +167,10 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     }
     
     func locationManager(manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        NSLog("didUpdateHeading newHeading:%@", newHeading)
+        //NSLog("didUpdateHeading newHeading:%@", newHeading)
     }
     
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [AnyObject]) {
-        NSLog("didUpdateLocations: %@", locations)
+        //NSLog("didUpdateLocations: %@", locations)
     }
 }
