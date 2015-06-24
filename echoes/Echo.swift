@@ -26,6 +26,8 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     let audioSession = AVAudioSession.sharedInstance()
     var recorder: AVAudioRecorder?
     var nextRecorder: AVAudioRecorder?
+    var nextRecordStartTime = -1.0
+    let segmentLength = NSTimeInterval(60.0)
 
     let bucket = try! FileBucket(id: "echoes")
     
@@ -78,19 +80,37 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
         }
     }
     
-    // One minute segments.
-    let segmentLength = NSTimeInterval(5.0)
+    func stop() {
+        if (state == .Stopped) { return; }
+        if let recorder = recorder {
+            recorder.stop()
+            self.recorder = nil
+        }
+        if let nextRecorder = nextRecorder {
+            nextRecorder.stop()
+            self.nextRecorder = nil
+        }
+        do { try stopRecordingSession() } catch let error as NSError {
+            NSLog("Error closing AVAudioSession: %@", error)
+        }
+        NSLog("Recording stopped.")
+    }
     
     func initRecorders() throws {
         let rec = try createRecorder()
         recorder = rec
+        let start = rec.deviceCurrentTime
+        nextRecordStartTime = start + segmentLength
         try prepareNextRecorder()
-        rec.recordAtTime(rec.deviceCurrentTime, forDuration: segmentLength)
+        rec.recordAtTime(start, forDuration: segmentLength)
     }
     
     func prepareNextRecorder() throws {
         let rec = try createRecorder()
-        rec.recordAtTime(rec.deviceCurrentTime + segmentLength, forDuration: segmentLength)
+        NSLog("  will recordAtTime(%f forDuration: %f endingAt: %f",
+            nextRecordStartTime, segmentLength, nextRecordStartTime + segmentLength)
+        rec.recordAtTime(nextRecordStartTime, forDuration: segmentLength)
+        nextRecordStartTime += segmentLength
         self.nextRecorder = rec
     }
     
@@ -111,22 +131,6 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
                 stop()
             }
         }
-    }
-    
-    func stop() {
-        if (state == .Stopped) { return; }
-        if let recorder = recorder {
-            recorder.stop()
-            self.recorder = nil
-        }
-        if let nextRecorder = nextRecorder {
-            nextRecorder.stop()
-            self.nextRecorder = nil
-        }
-        do { try stopRecordingSession() } catch let error as NSError {
-            NSLog("Error closing AVAudioSession: %@", error)
-        }
-        NSLog("Recording stopped.")
     }
 
     func startRecordingSession() throws {
