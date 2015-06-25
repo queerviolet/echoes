@@ -26,14 +26,29 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
         AVSampleRateKey : 44100.0
     ]
     
+    struct SegmentRecorder {
+        let url: NSURL
+        let audioUrl: NSURL
+        let locationUrl: NSURL
+        let audioRecorder: AVAudioRecorder
+        let startTime: NSTimeInterval
+        
+        var description: String {
+            return "url: \"\(url)\", audioUrl: \"\(audioUrl)\", locationUrl: \"\(locationUrl)\", startTime: \"\(startTime)\""
+        }
+        
+        func stop() {
+            audioRecorder.stop()
+        }
+    }
+    
     let audioSession = AVAudioSession.sharedInstance()
-    var recorder: AVAudioRecorder?
-    var nextRecorder: AVAudioRecorder?
-    var nextRecordStartTime = -1.0
+    var recorder: SegmentRecorder?
+    var nextRecorder: SegmentRecorder?
     let segmentLength = NSTimeInterval(60.0)  // audio file length in seconds, must be at least 1.
     let segmentOverlap = NSTimeInterval(1.0e-3) // one millisecond of overlap between segments.
 
-    let bucket = try! FileBucket(bucketId: "echoes-segments")
+    let bucket = try! FileBucket(name: "echoes")
 
     let locationMgr = CLLocationManager()
 
@@ -105,31 +120,39 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     // Initializes recorder and nextRecorder and queues them for recording
     // at the appropriate times.
     func initRecorders() throws {
-        let rec = try createRecorder()
-        recorder = rec
-        let start = rec.deviceCurrentTime
-        nextRecordStartTime = start + segmentLength
+        recorder = try createRecorder(startTime: nil)
         try prepareNextRecorder()
-        rec.recordAtTime(start, forDuration: segmentLength)
     }
     
     // Initializes nextRecorder and queues it to start at the appropriate time.
     func prepareNextRecorder() throws {
-        let rec = try createRecorder()
-        NSLog("  will recordAtTime(%f forDuration: %f endingAt: %f",
-            nextRecordStartTime, segmentLength, nextRecordStartTime + segmentLength)
-        rec.recordAtTime(nextRecordStartTime, forDuration: segmentLength + segmentOverlap)
-        nextRecordStartTime += segmentLength
-        self.nextRecorder = rec
+        if let recorder = recorder {
+            nextRecorder = try createRecorder(startTime: recorder.startTime + segmentLength)
+        } else {
+            NSLog("prepareNextRecorder() called when no recording in progress. Stopping recording.")
+            state = .Stopped
+        }
     }
     
     // Returns an AVAudioRecorder set up to write to a URL pulled from bucket and notify
     // us when it's done via a delegate call.
-    func createRecorder() throws -> AVAudioRecorder {
-        let url = bucket.getUrl("m4a")
-        NSLog("Will write audio segment to: %@", url)
-        let rec = try AVAudioRecorder(URL: url, settings: recordingSettings)
-        rec.delegate = self
+    func createRecorder(startTime start: NSTimeInterval?) throws -> SegmentRecorder {
+        let echoUrl = try bucket.getUrlAndMkdir(ext: "echo")
+        let avUrl = echoUrl.URLByAppendingPathComponent("audio")
+                           .URLByAppendingPathExtension("m4a")
+        let locationUrl = echoUrl.URLByAppendingPathComponent("locations")
+                                  .URLByAppendingPathExtension("pb")
+        
+        let audioRecorder = try AVAudioRecorder(URL: avUrl, settings: recordingSettings)
+        let rec = SegmentRecorder(
+            url: echoUrl,
+            audioUrl: avUrl,
+            locationUrl: locationUrl,
+            audioRecorder: audioRecorder,
+            startTime: start != nil ? start! : audioRecorder.deviceCurrentTime)
+        NSLog("SegmentRecorder created: %@", rec.description)
+        rec.audioRecorder.delegate = self
+        rec.audioRecorder.recordAtTime(rec.startTime, forDuration: segmentLength + segmentOverlap)
         return rec
     }
     
@@ -137,7 +160,7 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     // recorder here.
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder, successfully flag: Bool) {
         NSLog("Recorder finished, wrote %@", recorder.url)
-        if (recorder == self.recorder && state == .Recording) {
+        if (recorder == self.recorder?.audioRecorder && state == .Recording) {
             self.recorder = self.nextRecorder
             do { try prepareNextRecorder() } catch let error as NSError {
                 NSLog("Error creating recorder for segment: %@", error)

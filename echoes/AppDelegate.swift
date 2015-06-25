@@ -23,9 +23,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             cancelButtonTitle: nil).show()
     }
     
-    func alert(title title: String, msg: String) {
+    func alert(title: String, msg text: String) {
         UIAlertView(title: title,
-            message: msg,
+            message: text,
             delegate: nil,
             cancelButtonTitle: nil).show()
     }
@@ -34,8 +34,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let vendorId = UIDevice.currentDevice().identifierForVendor?.UUIDString {
             NSLog("Vendor identifier: %@", vendorId)
         } else {
-            alert(title: "Vendor ID Unavailable",
-                  msg: "Couldn't read identifier for vendor. This should only happen if your phone is locked.")
+            alert("Vendor ID Unavailable",
+                msg: "Couldn't read identifier for vendor. This should only happen if your phone is locked.")
             NSLog("Vendor identifier unreadable.")
         }
         
