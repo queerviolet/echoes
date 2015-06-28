@@ -1,2 +1,2 @@
-echoes/Location.pb.swift:
-	protoc -Iext/protobuf-swift/src/compiler -I. location.proto --swift_out=echoes/
+ext/protobuf-swift/src/ProtocolBuffers/runtime-pb-swift/Location.pb.swift:
+	protoc -Iext/protobuf-swift/src/compiler -I. location.proto --swift_out=ext/protobuf-swift/src/ProtocolBuffers/runtime-pb-swift/

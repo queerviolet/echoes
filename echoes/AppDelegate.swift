@@ -17,17 +17,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var mapViewCtrl: EchoesMapViewController!
     
     func alert(msg: String) {
-        UIAlertView(title: "Echoes Alert",
+        UIAlertController(title: "Echoes Alert",
             message: msg,
-            delegate: nil,
-            cancelButtonTitle: nil).show()
+            preferredStyle: .Alert)
     }
     
     func alert(title: String, msg text: String) {
-        UIAlertView(title: title,
+        UIAlertController(title: title,
             message: text,
-            delegate: nil,
-            cancelButtonTitle: nil).show()
+            preferredStyle: .Alert)
     }
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {

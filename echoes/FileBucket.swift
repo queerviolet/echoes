@@ -59,4 +59,36 @@ class FileBucket {
         try fsMgr.createDirectoryAtURL(url, withIntermediateDirectories: false, attributes: nil)
         return url
     }
+    
+    func newObject(ext ext: String?) throws -> FileBucketObject {
+        let url = getUrl(ext: ext)
+        try fsMgr.createDirectoryAtURL(url, withIntermediateDirectories: false, attributes: nil)
+        return FileBucketObject(root: url, fsMgr: fsMgr)
+    }
+}
+
+class FileBucketObject {
+    let dir: NSURL
+    let fsMgr: NSFileManager
+    
+    init(root dir: NSURL, fsMgr: NSFileManager) {
+        self.dir = dir
+        self.fsMgr = fsMgr
+    }
+    
+    func url(fileName file: String) -> NSURL {
+        return dir.URLByAppendingPathComponent(file)
+    }
+    
+    func open(fileName file: String) throws -> NSFileHandle {
+        let path = dir.URLByAppendingPathComponent(file)
+        var output: NSFileHandle
+        do {
+            output = try NSFileHandle(forWritingToURL: path)
+        } catch _ as NSError {
+            fsMgr.createFileAtPath(path.path!, contents: nil, attributes: nil)
+            output = try NSFileHandle(forWritingToURL: path)
+        }
+        return output
+    }
 }
