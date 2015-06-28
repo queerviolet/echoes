@@ -19,10 +19,10 @@ struct Location {
     let latitude: Float64
     let longitude: Float64
     let altitude: Float64
-    let floor: Int32
+    let floor: Int64
     let horizontalAccuracy: Float64
     let verticalAccuracy: Float64
-    let speed: Double
+    let speed: Float64
     let course: Float64
 }
 
@@ -255,7 +255,7 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
                         latitude: loc.coordinate.latitude,
                         longitude: loc.coordinate.longitude,
                         altitude: loc.altitude,
-                        floor: Int32(loc.floor != nil ? loc.floor!.level : -1),
+                        floor: Int64(loc.floor != nil ? loc.floor!.level : -1),
                         horizontalAccuracy: loc.horizontalAccuracy,
                         verticalAccuracy: loc.verticalAccuracy,
                         speed: loc.speed,
