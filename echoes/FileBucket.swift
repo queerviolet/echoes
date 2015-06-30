@@ -10,18 +10,20 @@ import Foundation
 import UIKit
 
 class FileBucket {
-    let name: String!
-    let sessionId: String!
-    let dir: NSURL!
+    let name: String
+    let sessionId: String
+    let dir: NSURL
+    let root: NSURL
     var nextFileId = 0
 
     let fsMgr = NSFileManager.defaultManager()
+    var syncer: FileBucketSyncer?
     
     init(name bucketName: String) throws {
         self.name = bucketName
-        
+
         // Start at Documents/$bucketName
-        let root = try! fsMgr.URLForDirectory(
+        root = try! fsMgr.URLForDirectory(
             NSSearchPathDirectory.DocumentDirectory,
             inDomain: NSSearchPathDomainMask.UserDomainMask,
             appropriateForURL: nil,
@@ -44,6 +46,8 @@ class FileBucket {
         sessionId = sesh
 
         try fsMgr.createDirectoryAtURL(url, withIntermediateDirectories: true, attributes: nil)
+        self.syncer = FileBucketSyncer(bucket: self)
+        self.syncer?.fileBucket(bucket: self, didInitializeWithSessionId: sesh)
     }
     
     func getUrl(ext ext: String?) -> NSURL {
@@ -63,32 +67,96 @@ class FileBucket {
     func newObject(ext ext: String?) throws -> FileBucketObject {
         let url = getUrl(ext: ext)
         try fsMgr.createDirectoryAtURL(url, withIntermediateDirectories: false, attributes: nil)
-        return FileBucketObject(root: url, fsMgr: fsMgr)
+        return FileBucketObject(bucket: self, url: url)
     }
 }
 
 class FileBucketObject {
-    let dir: NSURL
-    let fsMgr: NSFileManager
+    let url: NSURL
+    let bucket: FileBucket
+    var streams = [FileBucketStream]()
     
-    init(root dir: NSURL, fsMgr: NSFileManager) {
-        self.dir = dir
-        self.fsMgr = fsMgr
+    init(bucket: FileBucket, url: NSURL) {
+        self.bucket = bucket
+        self.url = url
     }
     
-    func url(fileName file: String) -> NSURL {
-        return dir.URLByAppendingPathComponent(file)
+    func stream(name file: String) -> FileBucketStream {
+        let stream = FileBucketStream(object: self, name: file)
+        streams.append(stream)
+        return stream
     }
     
-    func open(fileName file: String) throws -> NSFileHandle {
-        let path = dir.URLByAppendingPathComponent(file)
-        var output: NSFileHandle
-        do {
-            output = try NSFileHandle(forWritingToURL: path)
-        } catch _ as NSError {
-            fsMgr.createFileAtPath(path.path!, contents: nil, attributes: nil)
-            output = try NSFileHandle(forWritingToURL: path)
+    func close() {
+        for stream in streams {
+            stream.close()
         }
-        return output
+    }
+    
+}
+
+class FileBucketStream {
+    let object: FileBucketObject
+    let name: String
+    let url: NSURL
+    
+    init(object: FileBucketObject, name: String) {
+        self.object = object
+        self.name = name
+        self.url = object.url.URLByAppendingPathComponent(name)
+    }
+    
+    var handle: NSFileHandle? {
+        get {
+            if let h = _handle { return h }
+
+            var h: NSFileHandle?
+            do {
+                h = try NSFileHandle(forWritingToURL: url)
+            } catch _ as NSError {
+                object.bucket.fsMgr.createFileAtPath(url.path!, contents: nil, attributes: nil)
+                h = try! NSFileHandle(forWritingToURL: url)
+            }
+            _handle = h
+            return h!
+        }
+    }
+    
+    var _handle: NSFileHandle? = nil
+    
+    func close() {
+        _handle?.closeFile()
+        object.bucket.syncer?.fileBucketStream(stream: self, didCloseSuccessfully: true)
+    }
+    
+}
+
+class FileBucketSyncer {
+    let bucket: FileBucket
+    let fsMgr = NSFileManager.defaultManager()
+    
+    init(bucket: FileBucket) {
+        self.bucket = bucket
+    }
+    
+    func fileBucket(bucket bucket: FileBucket, didInitializeWithSessionId sessionId: String) {
+        NSLog("FileBucketSyncer: syncing \(bucket)")
+        NSLog("  Root: %@", bucket.root)
+        //let enumerator = fsMgr.enumeratorAtPath(bucket.root.path!)
+        let keys = [NSURLIsDirectoryKey]
+        let enumerator: NSDirectoryEnumerator = fsMgr.enumeratorAtURL(bucket.root,
+            includingPropertiesForKeys:keys,
+            options: NSDirectoryEnumerationOptions(),
+            errorHandler: { (url: NSURL, error: NSError) -> Bool in
+                return true;
+            })!;
+        NSLog("all sessions: %@", enumerator.allObjects)
+        while let entry = enumerator.nextObject() as? String {
+            NSLog(entry)
+        }
+    }
+    
+    func fileBucketStream(stream stream: FileBucketStream, didCloseSuccessfully: Bool) {
+        
     }
 }

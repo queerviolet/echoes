@@ -16,6 +16,8 @@
 		5AC1E0911B3A64980043589D /* FileBucket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AC1E0901B3A64980043589D /* FileBucket.swift */; };
 		5AE156081B38E29F00A0A64C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 5AE156071B38E29F00A0A64C /* Default-568h@2x.png */; };
 		5AE1560A1B390D6000A0A64C /* Echo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AE156091B390D6000A0A64C /* Echo.swift */; };
+		5AF66BB91B40B144008B1707 /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF66BB81B40B144008B1707 /* Async.swift */; };
+		5AF66BBB1B40F6FF008B1707 /* ExtendedAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AF66BBA1B40F6FF008B1707 /* ExtendedAttributes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +44,8 @@
 		5AC1E0901B3A64980043589D /* FileBucket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileBucket.swift; sourceTree = "<group>"; };
 		5AE156071B38E29F00A0A64C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		5AE156091B390D6000A0A64C /* Echo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Echo.swift; sourceTree = "<group>"; };
+		5AF66BB81B40B144008B1707 /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
+		5AF66BBA1B40F6FF008B1707 /* ExtendedAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtendedAttributes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +70,7 @@
 		5A8269FE1B38A5A700A39D83 = {
 			isa = PBXGroup;
 			children = (
+				5AF66BBA1B40F6FF008B1707 /* ExtendedAttributes.swift */,
 				5A826A2C1B38A98500A39D83 /* MapKit.framework */,
 				5A826A091B38A5A700A39D83 /* echoes */,
 				5A826A1F1B38A5A700A39D83 /* echoesTests */,
@@ -92,6 +97,7 @@
 				5A826A131B38A5A700A39D83 /* Images.xcassets */,
 				5A826A0A1B38A5A700A39D83 /* Supporting Files */,
 				5A7603CB1B3DCA0B007745AF /* Struct.swift */,
+				5AF66BB81B40B144008B1707 /* Async.swift */,
 			);
 			path = echoes;
 			sourceTree = "<group>";
@@ -229,8 +235,10 @@
 			files = (
 				5AE1560A1B390D6000A0A64C /* Echo.swift in Sources */,
 				5AC1E0911B3A64980043589D /* FileBucket.swift in Sources */,
+				5AF66BBB1B40F6FF008B1707 /* ExtendedAttributes.swift in Sources */,
 				5A826A0F1B38A5A700A39D83 /* EchoesMapView.swift in Sources */,
 				5A7603CC1B3DCA0B007745AF /* Struct.swift in Sources */,
+				5AF66BB91B40B144008B1707 /* Async.swift in Sources */,
 				5A826A0D1B38A5A700A39D83 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

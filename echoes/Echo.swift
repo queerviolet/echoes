@@ -63,23 +63,20 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     ]
     
     struct SegmentRecorder {
-        let url: NSURL
-        let audioUrl: NSURL
-        let locationUrl: NSURL
-        let headingUrl: NSURL
-        let locationFile: NSFileHandle
-        let headingFile: NSFileHandle
+        let object: FileBucketObject
+        let audio: FileBucketStream
+        let location: FileBucketStream
+        let heading: FileBucketStream
+        
         let audioRecorder: AVAudioRecorder
         let startTime: NSTimeInterval
         
         var description: String {
-            return "url: \"\(url)\", audioUrl: \"\(audioUrl)\", locationUrl: \"\(locationUrl)\", headingUrl: \"\(headingUrl)\", startTime: \"\(startTime)\""
+            return "url: \"\(object.url)\", audioUrl: \"\(audio.url)\", locationUrl: \"\(location.url)\", headingUrl: \"\(heading.url)\", startTime: \"\(startTime)\""
         }
         
-        func stop() {
-            audioRecorder.stop()
-            locationFile.closeFile()
-            headingFile.closeFile()
+        func close() {
+            object.close()
         }
     }
     
@@ -120,8 +117,8 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     }
     
     func stop() {
-        recorder?.stop(); recorder = nil
-        nextRecorder?.stop(); nextRecorder = nil
+        recorder?.close(); recorder = nil
+        nextRecorder?.close(); nextRecorder = nil
         do { try stopRecordingSession() } catch let error as NSError {
             NSLog("Error closing AVAudioSession: %@", error)
         }
@@ -178,18 +175,13 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     // us when it's done via a delegate call.
     func createRecorder(startTime start: NSTimeInterval?) throws -> SegmentRecorder {
         let echo = try bucket.newObject(ext: "echo")
-        let avUrl = echo.url(fileName: "audio.m4a")
-        let locationUrl = echo.url(fileName: "locations.pack")
-        let headingUrl = echo.url(fileName: "headings.pack")
-        NSLog("  Writing locations to %@", locationUrl)
-        let audioRecorder = try AVAudioRecorder(URL: avUrl, settings: recordingSettings)
+        NSLog("  Writing to echo: %@", echo.url)
+        let audioRecorder = try AVAudioRecorder(URL: echo.stream(name: "audio.m4a").url, settings: recordingSettings)
         let rec = SegmentRecorder(
-            url: echo.dir,
-            audioUrl: avUrl,
-            locationUrl: locationUrl,
-            headingUrl: headingUrl,
-            locationFile: try echo.open(fileName: "locations.pack"),
-            headingFile: try echo.open(fileName: "headings.pack"),
+            object: echo,
+            audio: echo.stream(name: "audio.m4a"),
+            location: echo.stream(name: "location.pack"),
+            heading: echo.stream(name: "heading.pack"),
             audioRecorder: audioRecorder,
             startTime: start != nil ? start! : audioRecorder.deviceCurrentTime)
         NSLog("SegmentRecorder created: %@", rec.description)
@@ -203,8 +195,7 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder, successfully flag: Bool) {
         NSLog("Recorder finished, wrote %@", recorder.url)
         if (recorder == self.recorder?.audioRecorder && state == .Recording) {
-            self.recorder?.locationFile.closeFile()
-            self.recorder?.headingFile.closeFile()
+            self.recorder?.close()
             self.recorder = self.nextRecorder
             do { try prepareNextRecorder() } catch let error as NSError {
                 NSLog("Error creating recorder for segment: %@", error)
@@ -241,7 +232,7 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
                 magneticHeading: newHeading.magneticHeading,
                 headingAccuracy: newHeading.headingAccuracy,
                 x: newHeading.x, y: newHeading.y, z: newHeading.z)
-            writeStruct(toFile: rec.headingFile, obj: heading)
+            writeStruct(toFile: rec.heading.handle!, obj: heading)
         }
     }
     
@@ -260,7 +251,7 @@ class EchoRecorder: NSObject, CLLocationManagerDelegate, AVAudioRecorderDelegate
                         verticalAccuracy: loc.verticalAccuracy,
                         speed: loc.speed,
                         course: loc.course)
-                    writeStruct(toFile: rec.locationFile, obj: location)
+                    writeStruct(toFile: rec.location.handle!, obj: location)
                 }
             }
         }
