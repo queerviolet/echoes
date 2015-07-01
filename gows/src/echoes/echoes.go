@@ -2,7 +2,7 @@ package main
 
 import (
 //  "encoding/binary"
-//  "encoding/json"
+  "encoding/json"
   "bytes"
 //  "bufio"
   "os"
@@ -82,6 +82,8 @@ type Heading struct {
 
 func main() {
   dataType := flag.String("type", "location", "type of data ('location' or 'heading')")
+  outputJson := flag.Bool("json", false, "output json")
+
   flag.Parse()
   files := flag.Args()
 
@@ -98,7 +100,17 @@ func main() {
     })
 
     for record := range records {
-      fmt.Printf("%s\n", record)
+      if *outputJson {
+        jsonBytes, err := json.Marshal(record)
+        if err != nil {
+          fmt.Printf("(json) %s: %s", file, err)
+          break
+        } else {
+          fmt.Println(string(jsonBytes))
+        }
+      } else {
+        fmt.Printf("%s\n", record)
+      }
     }
 
     select {

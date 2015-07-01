@@ -73,8 +73,6 @@ func ReadMany(reader io.Reader,
     if (err != nil && err != io.EOF) {
       errors <- err
     }
-
-    log.Println("closing up")
   }()
 
   return records, errors
