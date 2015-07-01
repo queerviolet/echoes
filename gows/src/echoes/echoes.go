@@ -10,7 +10,7 @@ import (
   "fmt"
   "time"
   "reflect"
-
+  "json"
   "record"
 )
 
@@ -98,7 +98,9 @@ func main() {
     })
 
     for record := range records {
-      fmt.Printf("%s\n", record)
+      jsonStr, err := json.Marshal(record)
+      if err != nil { fmt.Printf("json %s: %s", file, err) }
+      fmt.Printf("%s\n", string(jsonStr))
     }
 
     select {
