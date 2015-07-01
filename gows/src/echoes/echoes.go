@@ -1,16 +1,14 @@
 package main
 
 import (
-//  "encoding/binary"
   "encoding/json"
   "bytes"
-//  "bufio"
   "os"
   "flag"
-//  "io"
   "fmt"
   "time"
   "reflect"
+
   "record"
 )
 
