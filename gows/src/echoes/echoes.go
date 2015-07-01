@@ -2,6 +2,7 @@ package main
 
 import (
 //  "encoding/binary"
+//  "encoding/json"
   "bytes"
 //  "bufio"
   "os"
@@ -10,7 +11,6 @@ import (
   "fmt"
   "time"
   "reflect"
-  "json"
   "record"
 )
 
@@ -98,9 +98,7 @@ func main() {
     })
 
     for record := range records {
-      jsonStr, err := json.Marshal(record)
-      if err != nil { fmt.Printf("json %s: %s", file, err) }
-      fmt.Printf("%s\n", string(jsonStr))
+      fmt.Printf("%s\n", record)
     }
 
     select {
