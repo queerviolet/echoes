@@ -1,15 +1,17 @@
 package main
 
 import (
-  "encoding/binary"
+//  "encoding/binary"
   "bytes"
-  "bufio"
+//  "bufio"
   "os"
   "flag"
 //  "io"
   "fmt"
   "time"
   "reflect"
+
+  "record"
 )
 
 type SecondsFloat64 float64
@@ -78,12 +80,6 @@ type Heading struct {
     Z float64
 }
 
-func check(e error) {
-    if e != nil {
-        panic(e)
-    }
-}
-
 func main() {
   dataType := flag.String("type", "location", "type of data ('location' or 'heading')")
   flag.Parse()
@@ -91,38 +87,25 @@ func main() {
 
   for _, file := range files {
     f, err := os.Open(file)
-    check(err)
-    reader := bufio.NewReader(f)
+    if err != nil { panic(err) }
 
-    for {
-      var sz uint64
-      if err := binary.Read(reader, binary.LittleEndian, &sz); err != nil {
-        fmt.Printf("%s: %s\n", file, err)
-        break
+
+    records, errors := record.ReadMany(f, func() interface{} {
+      if (*dataType == "location") {
+        return new(Location)
       }
-  
-      switch (*dataType) {
-      case "location":
-        var loc Location
-        fmt.Printf("File record size: %d; target struct size: %d\n", sz, binary.Size(loc))        
-        if err := binary.Read(reader, binary.LittleEndian, &loc); err != nil {
-          fmt.Printf("%s: %s\n", file, err)
-          break;
-        }
-        fmt.Println(loc)
-  
-      case "heading":
-        var head Heading
-        fmt.Printf("File record size: %d; target struct size: %d\n", sz, binary.Size(head))
-        if err := binary.Read(reader, binary.LittleEndian, &sz); err != nil {
-          fmt.Printf("%s: %s\n", file, err)
-          break;
-        }
-        fmt.Println(head)
-  
-      default:
-        panic("unknown data type " + *dataType)
-      }
+      return new(Heading)
+    })
+
+    for record := range records {
+      fmt.Printf("%s\n", record)
+    }
+
+    select {
+    case err, ok := <- errors:
+      if ok { fmt.Printf("%s: %s", file, err) }
+    case <-time.After(10 * time.Millisecond):
+      fmt.Println("Error: timed out waiting for error")
     }
   }
 }

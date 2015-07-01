@@ -21,7 +21,10 @@ func toNSData<T>(var value: T) -> NSData {
 }
 
 func writeStruct<T>(toFile file: NSFileHandle, obj: T) {
-    file.writeData(toNSData(sizeof(T)))
+    let sz = sizeof(T)
+    let bigSz = CFSwapInt64HostToBig(UInt64(sz))
+    file.writeData(toNSData(bigSz))
+    file.writeData(toNSData(sz))
     file.writeData(toNSData(obj))
 }
 
