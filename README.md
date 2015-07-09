@@ -13,3 +13,7 @@ The idea is to record the sounds of a place breathing, eventually to visualize i
   write each file when the object is closed
   * the server needs to support a new method which create a new echo object in the database
   and returns a signed policy document allowing uploads to it
+2. Data processing pipeline
+  * the server needs to respond to Google Cloud Storage change events
+  * it should use a work queue and push work items into the queue in response to events
+  * and then support an /ingest call which updates a given object

@@ -36,8 +36,7 @@ func Read(reader io.Reader, record interface{}) error {
     // If the size of the record on disk doesn't agree with the size
     // of the struct, use a buffered reader initialized to zero.
     // szBuf = max(szStruct, szRecord)
-    var szBuf = szStruct
-    if szRecord > szBuf { szBuf = szRecord }
+    szBuf := szStruct; if szRecord > szBuf { szBuf = szRecord }
     buf := make([]byte, szBuf)
     reader.Read(buf[:szRecord])
     src = bytes.NewReader(buf)
