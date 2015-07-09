@@ -1,4 +1,4 @@
-application: echoes-dance
+application: echo-dance
 version: 1
 runtime: go
 api_version: go1
